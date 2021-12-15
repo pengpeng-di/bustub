@@ -34,7 +34,7 @@ BufferPoolManagerInstance::BufferPoolManagerInstance(size_t pool_size, uint32_t 
       "BPI index cannot be greater than the number of BPIs in the pool. In non-parallel case, index should just be 1.");
   // We allocate a consecutive memory space for the buffer pool.
   pages_ = new Page[pool_size_];
-  replacer_ = new LRUReplacer(pool_size);
+  replacer_ = new ClockReplacer(pool_size);
 
   // Initially, every page is in the free list.
   for (size_t i = 0; i < pool_size_; ++i) {
@@ -49,11 +49,41 @@ BufferPoolManagerInstance::~BufferPoolManagerInstance() {
 
 bool BufferPoolManagerInstance::FlushPgImp(page_id_t page_id) {
   // Make sure you call DiskManager::WritePage!
-  return false;
+  Page *tmp;
+  for(int i=0;i<(pool_size_-free_list_.size());i++){
+    pages_[i].WLatch();
+
+    if(pages_[i].GetPageId() == page_id){
+      tmp = pages_+i;
+      if(nullptr == tmp || tmp->page_id_==INVALID_PAGE_ID){
+        return false; 
+      }
+
+      if(pages_[i].is_dirty_){
+        disk_manager_->WritePage(page_id, pages_[i].data_);
+        pages_[i].is_dirty_ = false;
+      }
+    }
+    pages_[i].WUnlatch();
+  }
+  return true;
 }
 
 void BufferPoolManagerInstance::FlushAllPgsImp() {
   // You can do it!
+  Page *tmp;
+  for(int i=0; i<(pool_size_-free_list_.size()); i++){
+    tmp = pages_+i;
+    if(nullptr == tmp || tmp->page_id_ == INVALID_PAGE_ID){
+      continue;
+    }
+    if(pages_[i].is_dirty_){
+      pages_[i].WLatch();
+      disk_manager_->WritePage(pages_[i].GetPageId(), pages_[i].data_);
+      pages_[i].is_dirty_ = false;
+      pages_[i].WUnlatch();
+    }
+  }
 }
 
 Page *BufferPoolManagerInstance::NewPgImp(page_id_t *page_id) {
@@ -62,6 +92,11 @@ Page *BufferPoolManagerInstance::NewPgImp(page_id_t *page_id) {
   // 2.   Pick a victim page P from either the free list or the replacer. Always pick from the free list first.
   // 3.   Update P's metadata, zero out memory and add P to the page table.
   // 4.   Set the page ID output parameter. Return a pointer to P.
+  for(int i=0; i<(pool_size_-free_list_.size()); i++){
+    if(pages_[i].GetPageId() == *page_id){
+      return nullptr;
+    }
+  }
   return nullptr;
 }
 
