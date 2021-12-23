@@ -16,18 +16,19 @@
 #include <string>
 #include "buffer/buffer_pool_manager.h"
 #include "gtest/gtest.h"
+#include "include/common/logger.h"
 
 namespace bustub {
 
 // NOLINTNEXTLINE
 // Check whether pages containing terminal characters can be recovered
-TEST(BufferPoolManagerInstanceTest, DISABLED_BinaryDataTest) {
+TEST(BufferPoolManagerInstanceTest, BinaryDataTest) {
   const std::string db_name = "test.db";
   const size_t buffer_pool_size = 10;
 
   std::random_device r;
   std::default_random_engine rng(r());
-  std::uniform_int_distribution<char> uniform_dist(0);
+  std::uniform_int_distribution<char> uniform_dist(0);          //生成的数全部为0
 
   auto *disk_manager = new DiskManager(db_name);
   auto *bpm = new BufferPoolManagerInstance(buffer_pool_size, disk_manager);
@@ -39,7 +40,7 @@ TEST(BufferPoolManagerInstanceTest, DISABLED_BinaryDataTest) {
   ASSERT_NE(nullptr, page0);
   EXPECT_EQ(0, page_id_temp);
 
-  char random_binary_data[PAGE_SIZE];
+  char random_binary_data[PAGE_SIZE];               //PAGE_SIZE = 4096
   // Generate random binary data
   for (char &i : random_binary_data) {
     i = uniform_dist(rng);
@@ -86,7 +87,7 @@ TEST(BufferPoolManagerInstanceTest, DISABLED_BinaryDataTest) {
 }
 
 // NOLINTNEXTLINE
-TEST(BufferPoolManagerInstanceTest, DISABLED_SampleTest) {
+TEST(BufferPoolManagerInstanceTest, SampleTest) {
   const std::string db_name = "test.db";
   const size_t buffer_pool_size = 10;
 
@@ -119,6 +120,7 @@ TEST(BufferPoolManagerInstanceTest, DISABLED_SampleTest) {
   for (int i = 0; i < 5; ++i) {
     EXPECT_EQ(true, bpm->UnpinPage(i, true));
   }
+
   for (int i = 0; i < 4; ++i) {
     EXPECT_NE(nullptr, bpm->NewPage(&page_id_temp));
   }

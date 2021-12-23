@@ -18,6 +18,9 @@
 
 #include "buffer/replacer.h"
 #include "common/config.h"
+#include <map>
+#include <unordered_map>
+#include <mutex>
 
 namespace bustub {
 
@@ -47,6 +50,10 @@ class LRUReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
+  size_t capacity;        //maxmum of replacer
+  size_t size;            //num of frames in the replacer now
+  std::unordered_map<frame_id_t, size_t> container;
+  std::mutex replacer_latch;
 };
 
 }  // namespace bustub
