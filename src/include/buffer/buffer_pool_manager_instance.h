@@ -17,8 +17,8 @@
 #include <unordered_map>
 
 #include "buffer/buffer_pool_manager.h"
-#include "buffer/lru_replacer.h"
 #include "buffer/clock_replacer.h"
+#include "buffer/lru_replacer.h"
 #include "recovery/log_manager.h"
 #include "storage/disk/disk_manager.h"
 #include "storage/page/page.h"
@@ -145,6 +145,6 @@ class BufferPoolManagerInstance : public BufferPoolManager {
   std::list<frame_id_t> free_list_;
   /** This latch protects shared data structures. We recommend updating this comment to describe what it protects. */
   std::mutex latch_;
-  //denote the index in the parallel_buffer_pool_manager
+  // denote the index in the parallel_buffer_pool_manager
 };
 }  // namespace bustub

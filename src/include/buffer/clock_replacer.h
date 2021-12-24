@@ -13,9 +13,9 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <mutex>  // NOLINT
 #include <vector>
-#include <map>
 
 #include "buffer/replacer.h"
 #include "common/config.h"
@@ -46,20 +46,9 @@ class ClockReplacer : public Replacer {
   void Unpin(frame_id_t frame_id) override;
 
   size_t Size() override;
-  struct node
-  {
-    frame_id_t frame_id;
-    size_t ref;
-  };
-  
 
  private:
   // TODO(student): implement me!
-  size_t capacity;      //标志clock_replacer的容量
-  size_t size;          //表示当前有多少frame在里面
-  std::vector<node> clock_container;
-  size_t clock_handle_pos ;
-  ReaderWriterLatch clock_lacth;
 };
 
 }  // namespace bustub
