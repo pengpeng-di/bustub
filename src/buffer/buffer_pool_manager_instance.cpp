@@ -244,7 +244,6 @@ bool BufferPoolManagerInstance::UnpinPgImp(page_id_t page_id, bool is_dirty) {
   replacer_->Unpin(tmp_frame_id);
   free_list_.emplace_back(tmp_frame_id);
   if (iter == page_table_.end()) {
-    LOG_INFO("iter points to the end of a container");
     return false;
   }
   page_table_.erase(iter);
